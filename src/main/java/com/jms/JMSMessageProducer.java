@@ -1,6 +1,9 @@
 package com.jms;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.stereotype.Service;
 
 import javax.jms.*;
 import java.util.Random;
@@ -8,12 +11,15 @@ import java.util.Random;
 /**
  * Created by Denys Kovalenko on 9/19/2014.
  */
-public class HFUpdateMessageProducer {
+@Service
+@DependsOn("jmsMessageConsumer")
+public class JMSMessageProducer implements InitializingBean {
     private static String clientQueueName = "sm.stateh";
     private Session session;
     private MessageProducer producer;
 
-    public HFUpdateMessageProducer() {
+    @Override
+    public void afterPropertiesSet() throws Exception {
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
         try {
             Connection connection = connectionFactory.createConnection();
@@ -28,7 +34,7 @@ public class HFUpdateMessageProducer {
         }
     }
 
-    public void send(String messageText){
+    public void send(String messageText) {
         try {
             TextMessage txtMessage = session.createTextMessage();
             txtMessage.setText(messageText);
@@ -44,4 +50,5 @@ public class HFUpdateMessageProducer {
         long randomLong = random.nextLong();
         return Long.toHexString(randomLong);
     }
+
 }

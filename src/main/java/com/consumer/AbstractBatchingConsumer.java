@@ -1,28 +1,27 @@
 package com.consumer;
 
-import reactor.event.Event;
 import reactor.function.batch.BatchConsumer;
 import reactor.io.Buffer;
 
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by Denys Kovalenko on 9/19/2014.
+ * Created by Denys Kovalenko on 9/23/2014.
  */
-public class HFUpdateReactorBatchingConsumer implements BatchConsumer<Event<String>> {
+public abstract class AbstractBatchingConsumer implements BatchConsumer<String> {
     private Buffer writeBuffer;
     private static final String DELIMITER_STRING = "DELIMITER";
     private static final Buffer DELIMITER = new Buffer(DELIMITER_STRING.length(), true);
-
-    private static final int MESSAGE_LENGTH = 6;
+    private static final int BUFFERING_TIME_INTERVAL = 1; // in seconds
+    private static final int MESSAGE_LENGTH = 12;
     // If message length is not constant, let's assume this number as approximate
     private static final int NUMBER_OF_MESSAGES_IN_BUFFER = 4;
 
 
-    public HFUpdateReactorBatchingConsumer() {
-
+    public AbstractBatchingConsumer(){
         writeBuffer = new Buffer((MESSAGE_LENGTH + DELIMITER_STRING.length()) * NUMBER_OF_MESSAGES_IN_BUFFER, true);
         DELIMITER.append(DELIMITER_STRING);
     }
@@ -37,11 +36,10 @@ public class HFUpdateReactorBatchingConsumer implements BatchConsumer<Event<Stri
     }
 
     @Override
-    public void accept(final Event<String> message) {
-        String textMessage = message.getData();
-        if (textMessage.length() != MESSAGE_LENGTH) {
-            return;
-        }
+    public void accept(String textMessage) {
+//        if (textMessage.length() != MESSAGE_LENGTH) {
+//            return;
+//        }
 
         if (writeBuffer.remaining() <= textMessage.length() + DELIMITER_STRING.length()) {
             flush();
@@ -55,17 +53,19 @@ public class HFUpdateReactorBatchingConsumer implements BatchConsumer<Event<Stri
     private void flush() {
         writeBuffer.flip();
 
-        CountDownLatch latch = new CountDownLatch(1);
-
         Iterable<Buffer.View> views = writeBuffer.split(DELIMITER.duplicate().flip(), true);
-        Iterator<Buffer.View> viewIterator = views.iterator();
-        while (viewIterator.hasNext()) {
-            String token = viewIterator.next().get().asString();
-            System.out.println("The token is: " + token);
+        List<String> messages = new ArrayList<>();
+        for(Buffer.View view : views){
+            String message = view.get().asString();
+            messages.add(message);
         }
 
+        process(messages);
+
+        CountDownLatch latch = new CountDownLatch(1);
+        latch.countDown();
         try {
-            latch.await(1, TimeUnit.SECONDS);
+            latch.await(BUFFERING_TIME_INTERVAL, TimeUnit.SECONDS);
         } catch (final Exception ex) {
             throw new RuntimeException("got ex", ex);
         }
@@ -73,4 +73,5 @@ public class HFUpdateReactorBatchingConsumer implements BatchConsumer<Event<Stri
         writeBuffer.clear();
     }
 
+    public abstract void process(List<String> messages);
 }

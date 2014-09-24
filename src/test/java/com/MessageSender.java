@@ -1,8 +1,9 @@
 package com;
 
-import com.jms.HFUpdateMessageProducer;
+import com.jms.JMSMessageProducer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -13,13 +14,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class MessageSender {
 
+    @Autowired
+    JMSMessageProducer messageProducer;
+
     @Test
     public void sendMessages() {
-        HFUpdateMessageProducer messageProducer = new HFUpdateMessageProducer();
-
         for (int i = 0; i < 10; i++) {
             messageProducer.send("hello" + i);
         }
-
     }
 }
