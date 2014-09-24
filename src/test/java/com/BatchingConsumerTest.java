@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
 @ContextConfiguration(locations = {"classpath:application-spring-config.xml"})
 @RunWith(SpringJUnit4ClassRunner.class)
 public class BatchingConsumerTest {
-    private static String[] keys = {"key1", "key2", "key3", "key4", "key5"};
+    private static String[] keys = {"key0", "key1", "key2", "key3", "key4"};
 
     @Autowired
     JMSMessageProducer messageProducer;
@@ -33,31 +33,51 @@ public class BatchingConsumerTest {
         }
     }
 
+
+    // This test must prove that the buffer used there. As an example I set the buffer size 4 messages (it's configurable).
+    // So, this test method send messages one by one and checks that no data in DB after each sending.
+    // But after sending 5th message (that will fire buffer, with 4 messages to flush) all 4 messages should be in DB.
     @Test
-    public void shouldNotStoreOneMessage() {
-        String message = keys[0] + DELIMITER + "value";
+    public void shouldShowBufferBehavior(){
+        // Sending 1st message
+        String message = keys[0] + DELIMITER + "value" + 0;
         messageProducer.send(message);
 
-        String actualResult = redisDao.retrieve(keys[0]);
-        // Because buffer size is 4 messages, 1 message will never perform buffer to flush, so no data in DB
-        assertNull(actualResult);
-    }
+        // Check 1st message in DB
+        assertNull(redisDao.retrieve(keys[0]));
 
-    @Test
-    public void shouldSend5ButProceed4() {
-        // Send 5 messages one by one
-        for (int i = 0; i < keys.length; i++) {
-            String message = keys[i] + DELIMITER + "value" + i;
-            messageProducer.send(message);
-        }
+        // Sending 2nd message
+        String message2 = keys[1] + DELIMITER + "value" + 1;
+        messageProducer.send(message2);
+
+        // Check 2nd message in DB
+        assertNull(redisDao.retrieve(keys[1]));
+
+        // Sending 3d message
+        String message3 = keys[2] + DELIMITER + "value" + 2;
+        messageProducer.send(message3);
+
+        // Check 3d message in DB
+        assertNull(redisDao.retrieve(keys[2]));
+
+        // Sending 4st message
+        String message4 = keys[3] + DELIMITER + "value" + 3;
+        messageProducer.send(message4);
+
+        // Check 4st message in DB
+        assertNull(redisDao.retrieve(keys[3]));
+
+        // Sending 5th message
+        String message5 = keys[4] + DELIMITER + "value" + 4;
+        messageProducer.send(message5);
 
         waitWhileDataWillSendToRedis();
 
-        // Check that 4 messages were stores in DB, one left in buffer
+        // Check 5th message in DB
         for (int i = 0; i < keys.length - 1; i++) {
-            String actualResult = redisDao.retrieve(keys[i]);
-            assertEquals("value" + i, actualResult);
+            assertEquals("value" + i, redisDao.retrieve(keys[i]));
         }
+
     }
 
     private void waitWhileDataWillSendToRedis() {
