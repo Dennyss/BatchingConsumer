@@ -1,5 +1,6 @@
 package com.consumer;
 
+import reactor.event.Event;
 import reactor.function.batch.BatchConsumer;
 import reactor.io.Buffer;
 
@@ -11,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by Denys Kovalenko on 9/23/2014.
  */
-public abstract class AbstractBatchingConsumer implements BatchConsumer<String> {
+public abstract class AbstractBatchingConsumer<T> implements BatchConsumer<T> {
     private Buffer writeBuffer;
     private static final String DELIMITER_STRING = "DELIMITER";
     private static final Buffer DELIMITER = new Buffer(DELIMITER_STRING.length(), true);
@@ -36,10 +37,13 @@ public abstract class AbstractBatchingConsumer implements BatchConsumer<String> 
     }
 
     @Override
-    public void accept(String textMessage) {
-//        if (textMessage.length() != MESSAGE_LENGTH) {
-//            return;
-//        }
+    public void accept(T message) {
+        if(!(message instanceof Event)){
+            // Add log statement: "message type is not supported"
+            return;
+        }
+
+        String textMessage = ((Event<String>) message).getData();
 
         if (writeBuffer.remaining() <= textMessage.length() + DELIMITER_STRING.length()) {
             flush();
@@ -61,14 +65,6 @@ public abstract class AbstractBatchingConsumer implements BatchConsumer<String> 
         }
 
         process(messages);
-
-        CountDownLatch latch = new CountDownLatch(1);
-        latch.countDown();
-        try {
-            latch.await(BUFFERING_TIME_INTERVAL, TimeUnit.SECONDS);
-        } catch (final Exception ex) {
-            throw new RuntimeException("got ex", ex);
-        }
 
         writeBuffer.clear();
     }

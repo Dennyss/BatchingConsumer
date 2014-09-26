@@ -7,9 +7,11 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.Environment;
-import reactor.core.composable.Deferred;
-import reactor.core.composable.Stream;
-import reactor.core.composable.spec.Streams;
+import reactor.core.processor.Operation;
+import reactor.core.processor.Processor;
+import reactor.core.processor.spec.ProcessorSpec;
+import reactor.event.Event;
+import reactor.function.Supplier;
 
 import javax.jms.*;
 
@@ -25,8 +27,7 @@ public class JMSMessageConsumer implements MessageListener, InitializingBean {
     @Autowired
     private HFUpdateBatchingConsumer batchingConsumer;
 
-    //    private Processor<Event<String>> writeProcessor;
-    private Deferred<String, Stream<String>> deferred;
+    private Processor<Event<String>> processor;
 
     @Override
     public void afterPropertiesSet() {
@@ -56,23 +57,15 @@ public class JMSMessageConsumer implements MessageListener, InitializingBean {
         // Reactor related
         Environment environment = new Environment();
 
-//        writeProcessor = new ProcessorSpec<Event<String>>()
-//                .dataSupplier(new Supplier<Event<String>>() {
-//                    @Override
-//                    public Event<String> get() {
-//                        return new Event<String>(new String());
-//                    }
-//                })
-//                .consume(batchingConsumer)
-//                .get();
-
-        deferred = Streams.<String>defer()
-                .env(environment)
-                .dispatcher(Environment.RING_BUFFER)
+        processor = new ProcessorSpec<Event<String>>()
+                .dataSupplier(new Supplier<Event<String>>() {
+                    public Event<String> get() {
+                        return new Event<String>(new String());
+                    }
+                })
+                .consume(batchingConsumer)
                 .get();
 
-        Stream<String> stream = deferred.compose();
-        stream.consume(batchingConsumer);
     }
 
 
@@ -80,12 +73,9 @@ public class JMSMessageConsumer implements MessageListener, InitializingBean {
     public void onMessage(Message message) {
         TextMessage textMessage = (TextMessage) message;
         try {
-//            Operation<Event<String>> operation = writeProcessor.get();
-//            operation.get().setData(textMessage.getText());
-//            operation.commit();
-
-            deferred.accept(textMessage.getText());
-
+            Operation<Event<String>> op = processor.prepare();
+            op.get().setData(textMessage.getText());
+            op.commit();
         } catch (JMSException e) {
             e.printStackTrace();
         }
