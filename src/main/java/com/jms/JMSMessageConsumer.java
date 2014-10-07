@@ -1,47 +1,32 @@
 package com.jms;
 
-import com.consumer.HFUpdateBatchingConsumer;
+import com.consumer.ReactorMessageConsumer;
+import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.broker.BrokerService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import reactor.core.Environment;
-import reactor.core.processor.Operation;
-import reactor.core.processor.Processor;
-import reactor.core.processor.spec.ProcessorSpec;
+import reactor.core.Reactor;
 import reactor.event.Event;
-import reactor.function.Supplier;
+import reactor.event.selector.Selectors;
 
 import javax.jms.*;
 
 /**
- * Created by Denys Kovalenko on 9/19/2014.
+ * Created by Denys Kovalenko on 10/6/2014.
  */
-@Service("jmsMessageConsumer")
 public class JMSMessageConsumer implements MessageListener, InitializingBean {
     private static String messageQueueName = "sm.stateh";
-    private static String messageBrokerUrl = "tcp://localhost:61616";
     private Session session;
 
     @Autowired
-    private HFUpdateBatchingConsumer batchingConsumer;
+    private Reactor reactor;
 
-    private Processor<Event<String>> processor;
+    @Autowired
+    private ReactorMessageConsumer reactorMessageConsumer;
 
     @Override
     public void afterPropertiesSet() {
-        try {
-            BrokerService broker = new BrokerService();
-            broker.setPersistent(false);
-            broker.setUseJmx(false);
-            broker.addConnector(messageBrokerUrl);
-            broker.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(messageBrokerUrl);
+        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(ActiveMQConnection.DEFAULT_BROKER_URL);
         try {
             Connection connection = connectionFactory.createConnection();
             connection.start();
@@ -54,18 +39,7 @@ public class JMSMessageConsumer implements MessageListener, InitializingBean {
             e.printStackTrace();
         }
 
-        // Reactor related
-        Environment environment = new Environment();
-
-        processor = new ProcessorSpec<Event<String>>()
-                .dataSupplier(new Supplier<Event<String>>() {
-                    public Event<String> get() {
-                        return new Event<String>(new String());
-                    }
-                })
-                .consume(batchingConsumer)
-                .get();
-
+        reactor.on(Selectors.$("reactorMessagePattern"), reactorMessageConsumer);
     }
 
 
@@ -73,17 +47,11 @@ public class JMSMessageConsumer implements MessageListener, InitializingBean {
     public void onMessage(Message message) {
         TextMessage textMessage = (TextMessage) message;
         try {
-            Operation<Event<String>> op = processor.prepare();
-            op.get().setData(textMessage.getText());
-            op.commit();
+            reactor.notify("reactorMessagePattern", Event.wrap(textMessage.getText()));
+            //System.out.println(textMessage.getText());
         } catch (JMSException e) {
             e.printStackTrace();
         }
     }
-
-    // Uncomment it in case we want to run consumer as a standalone app
-//    public static void main(String[] args) throws Exception {
-//        ApplicationContext context = new ClassPathXmlApplicationContext("application-spring-config.xml");
-//    }
 
 }

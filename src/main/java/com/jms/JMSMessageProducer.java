@@ -1,18 +1,15 @@
 package com.jms;
 
+import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.stereotype.Service;
 
 import javax.jms.*;
 import java.util.Random;
 
 /**
- * Created by Denys Kovalenko on 9/19/2014.
+ * Created by Denys Kovalenko on 10/6/2014.
  */
-@Service
-@DependsOn("jmsMessageConsumer")
 public class JMSMessageProducer implements InitializingBean {
     private static String clientQueueName = "sm.stateh";
     private Session session;
@@ -20,7 +17,7 @@ public class JMSMessageProducer implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(ActiveMQConnection.DEFAULT_BROKER_URL);
         try {
             Connection connection = connectionFactory.createConnection();
             connection.start();
