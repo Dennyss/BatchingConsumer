@@ -34,8 +34,16 @@ public class SpringConfiguration {
         return new Environment();
     }
 
-    @Bean
-    public Deferred createStream(){
+    @Bean(name = "firstDef")
+    public Deferred createDeferred(){
+        return Streams.<String>defer()
+                .env(createEnvironment())
+                .dispatcher(Environment.RING_BUFFER)
+                .get();
+    }
+
+    @Bean(name = "secondDef")
+    public Deferred createDeferred2(){
         return Streams.<String>defer()
                 .env(createEnvironment())
                 .dispatcher(Environment.RING_BUFFER)
