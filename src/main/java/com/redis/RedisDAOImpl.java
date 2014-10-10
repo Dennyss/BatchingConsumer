@@ -6,7 +6,6 @@ import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -14,7 +13,6 @@ import java.util.List;
  * Created by Denys Kovalenko on 9/23/2014.
  */
 public class RedisDAOImpl implements RedisDAO, InitializingBean {
-    public static final String DELIMITER = "#";
     private StringRedisTemplate stringRedisTemplate;
 
     private JedisConnectionFactory jedisConnectionFactory;
@@ -23,20 +21,8 @@ public class RedisDAOImpl implements RedisDAO, InitializingBean {
         this.jedisConnectionFactory = jedisConnectionFactory;
     }
 
-
     public void save(String key, String value) {
         stringRedisTemplate.opsForValue().set(key, value);
-    }
-
-    @Override
-    public void saveAll(List<String> entries) {
-        for (String entry : entries) {
-            String[] parts = entry.split(DELIMITER);
-            String key = parts[0];
-            String value = parts[1];
-
-            save(key, value);
-        }
     }
 
     public String retrieve(String key) {

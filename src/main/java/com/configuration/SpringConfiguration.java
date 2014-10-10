@@ -1,10 +1,19 @@
 package com.configuration;
 
-import com.consumer.BatchingConsumer;
-import com.consumer.ReactorMessageConsumer;
+import com.core.FlowSpecification;
+import com.core.InputDispatcher;
 import com.jms.JMSMessageConsumer;
 import com.jms.JMSMessageProducer;
 import com.redis.RedisDAOImpl;
+import com.tasks.shopping.CheckoutAllItems;
+import com.tasks.shopping.PutToShoppingCart;
+import com.tasks.shopping.autoparts.BuyOil;
+import com.tasks.shopping.autoparts.BuyTires;
+import com.tasks.farmwork.FeedChickens;
+import com.tasks.farmwork.FeedPigs;
+import com.tasks.farmwork.WashClothes;
+import com.tasks.shopping.grocery.BuyApples;
+import com.tasks.shopping.grocery.BuyBananas;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.*;
@@ -34,7 +43,7 @@ public class SpringConfiguration {
         return new Environment();
     }
 
-    @Bean(name = "firstDef")
+    @Bean
     public Deferred createDeferred(){
         return Streams.<String>defer()
                 .env(createEnvironment())
@@ -42,20 +51,17 @@ public class SpringConfiguration {
                 .get();
     }
 
-    @Bean(name = "secondDef")
-    public Deferred createDeferred2(){
-        return Streams.<String>defer()
-                .env(createEnvironment())
+    @Bean
+    public Reactor createReactor(Environment env) {
+        return Reactors.reactor()
+                .env(env)
                 .dispatcher(Environment.RING_BUFFER)
                 .get();
     }
 
     @Bean
-    Reactor createReactor(Environment env) {
-        return Reactors.reactor()
-                .env(env)
-                .dispatcher(Environment.RING_BUFFER)
-                .get();
+    public FlowConfiguration createFlowConfiguration(){
+        return new FlowConfiguration();
     }
 
     @Bean
@@ -80,13 +86,52 @@ public class SpringConfiguration {
     }
 
     @Bean
-    public BatchingConsumer createBatchingConsumer(){
-        return new BatchingConsumer();
+    public InputDispatcher createInputDispatcher(){
+        return new InputDispatcher();
     }
 
     @Bean
-    public ReactorMessageConsumer createReactorMessageConsumer(){
-        return new ReactorMessageConsumer();
+    public BuyApples createBuyApplesTask(){
+        return new BuyApples();
     }
 
+    @Bean
+    public BuyBananas createBuyBananasTask(){
+        return new BuyBananas();
+    }
+
+    @Bean
+    public BuyOil createBuyOilTask(){
+        return new BuyOil();
+    }
+
+    @Bean
+    public BuyTires createBuyTiresTask(){
+        return new BuyTires();
+    }
+
+    @Bean
+    public PutToShoppingCart createPutToShoppingCart(){
+        return new PutToShoppingCart();
+    }
+
+    @Bean
+    public CheckoutAllItems createCheckoutAllItems(){
+        return new CheckoutAllItems();
+    }
+
+    @Bean
+    public FeedChickens createFeedChickens(){
+        return new FeedChickens();
+    }
+
+    @Bean
+    public FeedPigs createFeedPigs(){
+        return new FeedPigs();
+    }
+
+    @Bean
+    public WashClothes createWashClothes(){
+        return new WashClothes();
+    }
 }

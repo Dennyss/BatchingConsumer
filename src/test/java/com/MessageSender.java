@@ -16,7 +16,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public class MessageSender {
 
     @Autowired
-    JMSMessageProducer messageProducer;
+    private JMSMessageProducer messageProducer;
 
     @Test
     public void sendMessages() {

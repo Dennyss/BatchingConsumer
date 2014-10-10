@@ -11,7 +11,7 @@ import java.util.Random;
  * Created by Denys Kovalenko on 10/6/2014.
  */
 public class JMSMessageProducer implements InitializingBean {
-    private static String clientQueueName = "sm.stateh";
+    public static final String QUEUE_NAME = "queueName";
     private Session session;
     private MessageProducer producer;
 
@@ -22,7 +22,7 @@ public class JMSMessageProducer implements InitializingBean {
             Connection connection = connectionFactory.createConnection();
             connection.start();
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            Destination queue = session.createQueue(clientQueueName);
+            Destination queue = session.createQueue(QUEUE_NAME);
 
             producer = session.createProducer(queue);
             producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
