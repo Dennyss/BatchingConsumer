@@ -52,7 +52,7 @@ public class Showcases {
         waitWhileDataWillSendToRedis(RedisDAO.RECORD_KEY);
 
         String result = redisDAO.retrieve(RedisDAO.RECORD_KEY);
-        assertEquals(message + ":grocery:apples:grocery:bananas:autoparts:tires:autoparts:oil", result);
+        assertEquals(message + ":grocery:apples:grocery:pepsi:autoparts:tires:autoparts:oil", result);
     }
 
     @Test
@@ -78,10 +78,10 @@ public class Showcases {
         String message = FlowConfiguration.PARALLEL_WORK_DESTINATION + "#" + "initiate";
         messageProducer.send(message);
 
-//        waitWhileDataWillSendToRedis(RedisDAO.RECORD_KEY);
-//
-//        String result = redisDAO.retrieve(RedisDAO.RECORD_KEY);
-//        assertEquals(message + ":grocery:apples:grocery:bananas:autoparts:tires:autoparts:oil", result);
+        waitWhileDataWillSendToRedis(RedisDAO.RECORD_KEY);
+
+        String result = redisDAO.retrieve(RedisDAO.RECORD_KEY);
+        assertEquals(message + ":farm:feedChickens:farm:feedPigs", result);
     }
 
     @Test
@@ -96,8 +96,8 @@ public class Showcases {
 
         // Check 10 messages
         for (int i = 0; i < 10; i++) {
-            String result = redisDAO.retrieve(RedisDAO.RECORD_KEY);
-            assertEquals(message + ":grocery:apples:grocery:bananas:autoparts:tires:autoparts:oil", result);
+            String result = redisDAO.retrieve(RedisDAO.RECORD_KEY + i);
+            assertEquals(message + ":shopping:putToTheCart:shopping:checkout", result);
         }
 
     }

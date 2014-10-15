@@ -12,7 +12,7 @@ public class WashClothes implements Function<String, String> {
         String echoString = "farm:washingMachineStarted";
 
         for(int i = 0; i < 20; i++){
-            System.out.println("Parallel step executing ...");
+            System.out.println("WashClothes parallel step executing ...");
             pause(500);
         }
 

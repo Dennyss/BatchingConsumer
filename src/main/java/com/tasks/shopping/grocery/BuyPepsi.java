@@ -1,22 +1,23 @@
-package com.tasks.shopping.autoparts;
+package com.tasks.shopping.grocery;
 
 import reactor.function.Function;
 
 /**
- * Created by Denys Kovalenko on 10/8/2014.
+ * Created by Denys Kovalenko on 10/15/2014.
  */
-public class BuyTires implements Function<String, String> {
+public class BuyPepsi implements Function<String, String> {
 
     @Override
     public String apply(String value) {
-        String echoString = "autoparts:tires";
+        String echoString = "grocery:pepsi";
+        String derivedValue = value + ":" + echoString;
 
         for (int i = 0; i < 5; i++) {
-            System.out.println("BuyTires step executing ...");
+            System.out.println("BuyPepsi step executing ...");
             pause(500);
         }
 
-        return value + ":" + echoString;
+        return derivedValue;
     }
 
     private void pause(long millis) {

@@ -15,6 +15,7 @@ import com.tasks.farmwork.FeedPigs;
 import com.tasks.farmwork.WashClothes;
 import com.tasks.shopping.grocery.BuyApples;
 import com.tasks.shopping.grocery.BuyBananas;
+import com.tasks.shopping.grocery.BuyPepsi;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.Environment;
@@ -36,6 +37,8 @@ public class FlowConfiguration implements InitializingBean {
     private BuyApples buyApples;
     @Autowired
     private BuyBananas buyBananas;
+    @Autowired
+    private BuyPepsi buyPepsi;
     @Autowired
     private BuyTires buyTires;
     @Autowired
@@ -61,7 +64,7 @@ public class FlowConfiguration implements InitializingBean {
     public FlowSpecification processSeparateShopping(){
         return new FlowSpecification(new SeparateShoppingPredicate(), env)
                 .addStep(buyApples)
-                .addStep(buyBananas)
+                .addStep(buyPepsi)
                 .separate()  // Let's do another shopping in separate thread pool
                 .addStep(buyTires)
                 .addStep(buyOil);
@@ -75,7 +78,7 @@ public class FlowConfiguration implements InitializingBean {
     }
 
     public FlowSpecification processParallelWork(){
-        return new FlowSpecification(new ParallelWorkPredicate(),env)
+        return new FlowSpecification(new ParallelWorkPredicate(), env)
                 .addStep(feedChickens)
                 // start washing machine and continue to feed animals
                 .addParallelStep(washClothes)

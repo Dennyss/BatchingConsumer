@@ -1,6 +1,5 @@
 package com.configuration;
 
-import com.core.FlowSpecification;
 import com.core.InputDispatcher;
 import com.jms.JMSMessageConsumer;
 import com.jms.JMSMessageProducer;
@@ -14,6 +13,7 @@ import com.tasks.farmwork.FeedPigs;
 import com.tasks.farmwork.WashClothes;
 import com.tasks.shopping.grocery.BuyApples;
 import com.tasks.shopping.grocery.BuyBananas;
+import com.tasks.shopping.grocery.BuyPepsi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.*;
@@ -98,6 +98,11 @@ public class SpringConfiguration {
     @Bean
     public BuyBananas createBuyBananasTask(){
         return new BuyBananas();
+    }
+
+    @Bean
+    public BuyPepsi createBuyPepsiTask(){
+        return new BuyPepsi();
     }
 
     @Bean

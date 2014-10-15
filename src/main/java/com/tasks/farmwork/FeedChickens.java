@@ -12,7 +12,7 @@ public class FeedChickens implements Function<String, String> {
         String echoString = "farm:feedChickens";
 
         for(int i = 0; i < 5; i++){
-            System.out.println("Plain step 1 executing ...");
+            System.out.println("FeedChickens step executing ...");
             pause(500);
         }
 

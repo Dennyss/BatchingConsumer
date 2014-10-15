@@ -15,12 +15,13 @@ public class FeedPigs implements Function<String, String> {
     @Override
     public String apply(String value) {
         String echoString = "farm:feedPigs";
-        redisDAO.save(RedisDAOImpl.RECORD_KEY, value + ":" + echoString);
 
         for (int i = 0; i < 20; i++) {
-            System.out.println("Plain step 2 executing ...");
+            System.out.println("FeedPigs step executing ...");
             pause(500);
         }
+
+        redisDAO.save(RedisDAOImpl.RECORD_KEY, value + ":" + echoString);
 
         return null;
     }
