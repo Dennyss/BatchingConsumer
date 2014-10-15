@@ -20,10 +20,8 @@ public class MessageSender {
 
     @Test
     public void sendMessages() {
-
-//        for (int i = 0; i < 10; i++) {
-//            messageProducer.send("batchProcessing:helloFromTest: " + i);
-//        }
-        messageProducer.send("batchProcessing:helloFromTest:");
+        for (int i = 0; i < 10; i++) {
+            messageProducer.send("batchProcessing:helloFromTest: " + i);
+        }
     }
 }

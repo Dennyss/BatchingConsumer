@@ -25,19 +25,19 @@ public class FlowSpecification {
     private static final int BUFFER_FLUSH_TIMEOUT = 2000;  // 2 sec
 
     private Environment environment;
-    private Deferred<String, Stream<String>> firstDeferred;
-    private List<Stream<String>> streams;
+    private Deferred<MessageWrapper, Stream<MessageWrapper>> firstDeferred;
+    private List<Stream<MessageWrapper>> streams;
 
     public FlowSpecification(Predicate predicate, Environment environment) {
         this.environment = environment;
-        streams = new ArrayList<Stream<String>>();
+        streams = new ArrayList<Stream<MessageWrapper>>();
         firstDeferred = createNewDeferred(createRingBufferDispatcher());
         // Create new Stream, add filter and store it in list
         streams.add(firstDeferred.compose().filter(predicate));
     }
 
     public FlowSpecification addStep(Function step) {
-        Stream<String> stream = getLastStream();
+        Stream<MessageWrapper> stream = getLastStream();
         updateLastStream(stream.map(step));
         return this;
     }
@@ -63,7 +63,7 @@ public class FlowSpecification {
      * @return
      */
     public FlowSpecification addParallelStep(Function step) {
-        Deferred<String, Stream<String>> newDeferred = createNewDeferred(createWorkQueueDispatcher());
+        Deferred<MessageWrapper, Stream<MessageWrapper>> newDeferred = createNewDeferred(createWorkQueueDispatcher());
         updateLastStream(getLastStream().consume(newDeferred));
         // Continue to execute 'step' in separate thread execution
         newDeferred.compose().map(step);
@@ -78,7 +78,7 @@ public class FlowSpecification {
      * @return
      */
     public FlowSpecification separate() {
-        Deferred<String, Stream<String>> newDeferred = createNewDeferred(createRingBufferDispatcher());
+        Deferred<MessageWrapper, Stream<MessageWrapper>> newDeferred = createNewDeferred(createRingBufferDispatcher());
         // Connect prev execution and next
         connectExecutions(getLastStream(), newDeferred);
         streams.add(newDeferred.compose());
@@ -86,26 +86,26 @@ public class FlowSpecification {
         return this;
     }
 
-    public void process(String message) {
+    public void process(MessageWrapper message) {
         firstDeferred.accept(message);
     }
 
-    private void connectExecutions(Stream<String> previousStream, final Deferred<String, Stream<String>> newDeferred) {
+    private void connectExecutions(Stream<MessageWrapper> previousStream, final Deferred<MessageWrapper, Stream<MessageWrapper>> newDeferred) {
         previousStream.consume(newDeferred);
     }
 
     private Deferred createNewDeferred(Dispatcher dispatcher) {
-        return Streams.<String>defer()
+        return Streams.<MessageWrapper>defer()
                 .env(environment)
                 .dispatcher(dispatcher)
                 .get();
     }
 
-    private Stream<String> getLastStream() {
+    private Stream<MessageWrapper> getLastStream() {
         return streams.get(streams.size() - 1);
     }
 
-    private void updateLastStream(Stream<String> stream) {
+    private void updateLastStream(Stream<MessageWrapper> stream) {
         streams.set(streams.size() - 1, stream);
     }
 

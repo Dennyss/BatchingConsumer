@@ -1,14 +1,15 @@
 package com.tasks.shopping.grocery;
 
+import com.core.MessageWrapper;
 import reactor.function.Function;
 
 /**
  * Created by Denys Kovalenko on 10/15/2014.
  */
-public class BuyPepsi implements Function<String, String> {
+public class BuyPepsi implements Function<MessageWrapper, MessageWrapper> {
 
     @Override
-    public String apply(String value) {
+    public MessageWrapper apply(MessageWrapper value) {
         String echoString = "grocery:pepsi";
         String derivedValue = value + ":" + echoString;
 
@@ -17,7 +18,7 @@ public class BuyPepsi implements Function<String, String> {
             pause(500);
         }
 
-        return derivedValue;
+        return MessageWrapper.wrap(derivedValue);
     }
 
     private void pause(long millis) {

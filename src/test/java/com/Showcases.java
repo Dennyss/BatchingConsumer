@@ -84,7 +84,7 @@ public class Showcases {
         }
 
         // Wait for last record
-        waitWhileDataWillSendToRedis(RedisDAO.RECORD_KEY + 3);
+        waitWhileDataWillSendToRedis(RedisDAO.RECORD_KEY + 2);
 
         // Check first 4 messages (should have value because buffer flush timeout is 2 seconds)
         for (int i = 0; i < 4; i++) {

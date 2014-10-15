@@ -2,6 +2,7 @@ package com.jms;
 
 import com.core.InputDispatcher;
 import com.core.LoggingDispatcher;
+import com.core.MessageWrapper;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -47,8 +48,9 @@ public class JMSMessageConsumer implements MessageListener, InitializingBean {
     public void onMessage(Message message) {
         TextMessage textMessage = (TextMessage) message;
         try {
-            reactor.notify("messageProcessing", Event.wrap(textMessage.getText()));
-            reactor.notify("logging", Event.wrap(textMessage.getText()));
+            MessageWrapper messageWrapper = MessageWrapper.wrap(textMessage.getText());
+            reactor.notify("messageProcessing", Event.wrap(messageWrapper));
+            reactor.notify("logging", Event.wrap(messageWrapper));
         } catch (JMSException e) {
             e.printStackTrace();
         }

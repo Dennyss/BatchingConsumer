@@ -1,15 +1,16 @@
 package com.predicates;
 
 import com.configuration.FlowConfiguration;
+import com.core.MessageWrapper;
 import reactor.function.Predicate;
 
 /**
  * Created by Denys Kovalenko on 10/7/2014.
  */
-public class SeparateShoppingPredicate implements Predicate<String> {
+public class SeparateShoppingPredicate implements Predicate<MessageWrapper> {
 
     @Override
-    public boolean test(String value) {
-        return value.startsWith(FlowConfiguration.SEPARATE_SHOPPING_DESTINATION);
+    public boolean test(MessageWrapper value) {
+        return value.getMessage().startsWith(FlowConfiguration.SEPARATE_SHOPPING_DESTINATION);
     }
 }

@@ -6,10 +6,10 @@ import reactor.function.Consumer;
 /**
  * Created by Denys Kovalenko on 10/15/2014.
  */
-public class LoggingDispatcher implements Consumer<Event<String>> {
+public class LoggingDispatcher implements Consumer<Event<MessageWrapper>> {
 
     @Override
-    public void accept(Event<String> stringEvent) {
+    public void accept(Event<MessageWrapper> stringEvent) {
         System.out.println("LoggingDispatcher. Incoming message is: " + stringEvent.getData());
     }
 

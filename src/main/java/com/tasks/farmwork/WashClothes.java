@@ -1,14 +1,15 @@
 package com.tasks.farmwork;
 
+import com.core.MessageWrapper;
 import reactor.function.Function;
 
 /**
  * Created by Denys Kovalenko on 10/9/2014.
  */
-public class WashClothes implements Function<String, String> {
+public class WashClothes implements Function<MessageWrapper, MessageWrapper> {
 
     @Override
-    public String apply(String value) {
+    public MessageWrapper apply(MessageWrapper value) {
         String echoString = "farm:washingMachineStarted";
 
         for(int i = 0; i < 20; i++){
@@ -17,7 +18,7 @@ public class WashClothes implements Function<String, String> {
         }
 
 
-        return value + ":" + echoString;
+        return MessageWrapper.wrap(value + ":" + echoString);
     }
 
     private void pause(long millis) {

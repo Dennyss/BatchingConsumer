@@ -21,8 +21,6 @@ import org.springframework.context.annotation.*;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import reactor.core.Environment;
 import reactor.core.Reactor;
-import reactor.core.composable.Deferred;
-import reactor.core.composable.spec.Streams;
 import reactor.core.spec.Reactors;
 import redis.clients.jedis.JedisShardInfo;
 
@@ -42,14 +40,6 @@ public class SpringConfiguration {
     @Bean
     public Environment createEnvironment(){
         return new Environment();
-    }
-
-    @Bean
-    public Deferred createDeferred(){
-        return Streams.<String>defer()
-                .env(createEnvironment())
-                .dispatcher(Environment.RING_BUFFER)
-                .get();
     }
 
     @Bean

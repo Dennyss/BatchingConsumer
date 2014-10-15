@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by Denys Kovalenko on 10/8/2014.
  */
-public class InputDispatcher implements Consumer<Event<String>>, InitializingBean {
+public class InputDispatcher implements Consumer<Event<MessageWrapper>>, InitializingBean {
     private List<FlowSpecification> flowSpecifications;
 
     public void registerFlow(FlowSpecification flowSpecification){
@@ -18,7 +18,7 @@ public class InputDispatcher implements Consumer<Event<String>>, InitializingBea
     }
 
     @Override
-    public void accept(Event<String> event) {
+    public void accept(Event<MessageWrapper> event) {
         for(FlowSpecification flow : flowSpecifications){
             flow.process(event.getData());
         }
