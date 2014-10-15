@@ -4,7 +4,8 @@ import com.core.InputDispatcher;
 import com.core.FlowSpecification;
 import com.predicates.BatchingShoppingPredicate;
 import com.predicates.ParallelWorkPredicate;
-import com.predicates.ShoppingPredicate;
+import com.predicates.SeparateShoppingPredicate;
+import com.predicates.SimpleShoppingPredicate;
 import com.tasks.shopping.CheckoutAllItems;
 import com.tasks.shopping.PutToShoppingCart;
 import com.tasks.shopping.autoparts.BuyOil;
@@ -22,6 +23,7 @@ import reactor.core.Environment;
  * Created by Denys Kovalenko on 10/8/2014.
  */
 public class FlowConfiguration implements InitializingBean {
+    public static final String SIMPLE_SHOPPING_DESTINATION = "simpleShopping";
     public static final String SEPARATE_SHOPPING_DESTINATION = "separateShopping";
     public static final String BATCHING_SHOPPING_DESTINATION = "batchingShopping";
     public static final String PARALLEL_WORK_DESTINATION = "parallelWork";
@@ -49,8 +51,15 @@ public class FlowConfiguration implements InitializingBean {
     @Autowired
     private WashClothes washClothes;
 
+
+    public FlowSpecification processSimpleShopping(){
+        return new FlowSpecification(new SimpleShoppingPredicate(), env)
+                .addStep(buyApples)
+                .addStep(buyBananas);
+    }
+
     public FlowSpecification processSeparateShopping(){
-        return new FlowSpecification(new ShoppingPredicate(), env)
+        return new FlowSpecification(new SeparateShoppingPredicate(), env)
                 .addStep(buyApples)
                 .addStep(buyBananas)
                 .separate()  // Let's do another shopping in separate thread pool
@@ -68,7 +77,7 @@ public class FlowConfiguration implements InitializingBean {
     public FlowSpecification processParallelWork(){
         return new FlowSpecification(new ParallelWorkPredicate(),env)
                 .addStep(feedChickens)
-                // start washing machine and continue to feed farmwork animals
+                // start washing machine and continue to feed animals
                 .addParallelStep(washClothes)
                 .addStep(feedPigs);
     }
@@ -76,6 +85,7 @@ public class FlowConfiguration implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        inputDispatcher.registerFlow(processSimpleShopping());
         inputDispatcher.registerFlow(processSeparateShopping());
         inputDispatcher.registerFlow(processBatchingShopping());
         inputDispatcher.registerFlow(processParallelWork());

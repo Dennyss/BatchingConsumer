@@ -6,7 +6,7 @@ import reactor.function.Predicate;
 /**
  * Created by Denys Kovalenko on 10/7/2014.
  */
-public class ShoppingPredicate implements Predicate<String> {
+public class SeparateShoppingPredicate implements Predicate<String> {
 
     @Override
     public boolean test(String value) {

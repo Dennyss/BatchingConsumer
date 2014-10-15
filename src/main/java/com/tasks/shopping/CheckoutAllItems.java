@@ -18,9 +18,10 @@ public class CheckoutAllItems implements Function<List<String>, String> {
 
     @Override
     public String apply(List<String> messages) {
+        int i = 0;
         for (String message : messages) {
             String echoString = "shopping:checkout";
-            redisDAO.save(RedisDAOImpl.RECORD_KEY, message + ":" + echoString);
+            redisDAO.save(RedisDAOImpl.RECORD_KEY + (i++), message + ":" + echoString);
         }
 
         return null;

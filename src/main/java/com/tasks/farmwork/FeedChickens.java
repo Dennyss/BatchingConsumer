@@ -10,6 +10,19 @@ public class FeedChickens implements Function<String, String> {
     @Override
     public String apply(String value) {
         String echoString = "farm:feedChickens";
+
+        for(int i = 0; i < 5; i++){
+            System.out.println("Plain step 1 executing ...");
+            pause(500);
+        }
+
         return value + ":" + echoString;
+    }
+
+    private void pause(long millis) {
+        try {
+            Thread.currentThread().sleep(millis);
+        } catch (InterruptedException e) {
+        }
     }
 }

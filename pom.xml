@@ -41,6 +41,13 @@
             <groupId>org.projectreactor.spring</groupId>
             <artifactId>reactor-spring-context</artifactId>
         </dependency>
+
+        <!--<dependency>-->
+            <!--<groupId>org.projectreactor</groupId>-->
+            <!--<artifactId>reactor-net</artifactId>-->
+            <!--<version>1.1.4.RELEASE</version>-->
+        <!--</dependency>-->
+
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-client</artifactId>

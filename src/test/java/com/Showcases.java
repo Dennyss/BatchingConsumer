@@ -28,28 +28,89 @@ public class Showcases {
     @Before
     public void cleanDB() throws Exception {
         redisDAO.delete(RedisDAO.RECORD_KEY);
+        for (int i = 0; i < 10; i++) {
+            redisDAO.delete(RedisDAO.RECORD_KEY + i);
+        }
+    }
+
+    @Test
+    public void simpleProcessingShowcase() {
+        String message = FlowConfiguration.SIMPLE_SHOPPING_DESTINATION + "#" + "initiate";
+        messageProducer.send(message);
+
+        waitWhileDataWillSendToRedis(RedisDAO.RECORD_KEY);
+
+        String result = redisDAO.retrieve(RedisDAO.RECORD_KEY);
+        assertEquals(message + ":grocery:apples:grocery:bananas", result);
     }
 
     @Test
     public void separateProcessingShowcase() {
         String message = FlowConfiguration.SEPARATE_SHOPPING_DESTINATION + "#" + "initiate";
         messageProducer.send(message);
-        waitWhileDataWillSendToRedis();
+
+        waitWhileDataWillSendToRedis(RedisDAO.RECORD_KEY);
+
         String result = redisDAO.retrieve(RedisDAO.RECORD_KEY);
         assertEquals(message + ":grocery:apples:grocery:bananas:autoparts:tires:autoparts:oil", result);
     }
 
+    @Test
+    public void batchingProcessingShowcase() {
+        String message = FlowConfiguration.BATCHING_SHOPPING_DESTINATION + "#" + "initiate";
+        // Send 10 messages
+        for (int i = 0; i < 10; i++) {
+            messageProducer.send(message);
+        }
 
+        // Wait for last record
+        waitWhileDataWillSendToRedis(RedisDAO.RECORD_KEY + 9);
 
-
-    public void waitWhileDataWillSendToRedis() {
-        do {
-            pause(500);
-        } while (isDataStillSending());
+        // Check 10 messages
+        for (int i = 0; i < 10; i++) {
+            String result = redisDAO.retrieve(RedisDAO.RECORD_KEY + i);
+            assertEquals(message + ":shopping:putToTheCart:shopping:checkout", result);
+        }
     }
 
-    private boolean isDataStillSending() {
-        return redisDAO.retrieve(RedisDAO.RECORD_KEY) == null;
+    @Test
+    public void parallelProcessingShowcase() {
+        String message = FlowConfiguration.PARALLEL_WORK_DESTINATION + "#" + "initiate";
+        messageProducer.send(message);
+
+//        waitWhileDataWillSendToRedis(RedisDAO.RECORD_KEY);
+//
+//        String result = redisDAO.retrieve(RedisDAO.RECORD_KEY);
+//        assertEquals(message + ":grocery:apples:grocery:bananas:autoparts:tires:autoparts:oil", result);
+    }
+
+    @Test
+    public void batchingProcessingTest() {
+        String message = FlowConfiguration.BATCHING_SHOPPING_DESTINATION + "#" + "initiate";
+        // Send 10 messages
+        for (int i = 0; i < 10; i++) {
+            messageProducer.send(message);
+        }
+
+        waitWhileDataWillSendToRedis(RedisDAO.RECORD_KEY + 9);
+
+        // Check 10 messages
+        for (int i = 0; i < 10; i++) {
+            String result = redisDAO.retrieve(RedisDAO.RECORD_KEY);
+            assertEquals(message + ":grocery:apples:grocery:bananas:autoparts:tires:autoparts:oil", result);
+        }
+
+    }
+
+
+    public void waitWhileDataWillSendToRedis(String dbKey) {
+        do {
+            pause(500);
+        } while (isDataStillSending(dbKey));
+    }
+
+    private boolean isDataStillSending(String dbKey) {
+        return redisDAO.retrieve(dbKey) == null;
     }
 
     private void pause(long millis) {
