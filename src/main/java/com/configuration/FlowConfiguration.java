@@ -54,7 +54,6 @@ public class FlowConfiguration implements InitializingBean {
     @Autowired
     private WashClothes washClothes;
 
-
     public FlowSpecification processSimpleShopping(){
         return new FlowSpecification(new SimpleShoppingPredicate(), env)
                 .addStep(buyApples)
@@ -84,7 +83,6 @@ public class FlowConfiguration implements InitializingBean {
                 .addParallelStep(washClothes)
                 .addStep(feedPigs);
     }
-
 
     @Override
     public void afterPropertiesSet() throws Exception {

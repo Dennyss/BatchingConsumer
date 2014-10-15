@@ -3,6 +3,7 @@ package com.tasks.farmwork;
 import com.core.MessageWrapper;
 import com.redis.RedisDAO;
 import com.redis.RedisDAOImpl;
+import com.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import reactor.function.Function;
 
@@ -19,19 +20,12 @@ public class FeedPigs implements Function<MessageWrapper, MessageWrapper> {
 
         for (int i = 0; i < 20; i++) {
             System.out.println("FeedPigs step executing ...");
-            pause(500);
+            Utils.pause(500);
         }
 
         redisDAO.save(RedisDAOImpl.RECORD_KEY, value + ":" + echoString);
 
         return null;
-    }
-
-    private void pause(long millis) {
-        try {
-            Thread.currentThread().sleep(millis);
-        } catch (InterruptedException e) {
-        }
     }
 
 }

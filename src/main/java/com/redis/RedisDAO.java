@@ -1,7 +1,5 @@
 package com.redis;
 
-import java.util.List;
-
 /**
  * Created by Denys Kovalenko on 9/23/2014.
  */

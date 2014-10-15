@@ -80,7 +80,7 @@ public class FlowSpecification {
     public FlowSpecification separate() {
         Deferred<MessageWrapper, Stream<MessageWrapper>> newDeferred = createNewDeferred(createRingBufferDispatcher());
         // Connect prev execution and next
-        connectExecutions(getLastStream(), newDeferred);
+        getLastStream().consume(newDeferred);
         streams.add(newDeferred.compose());
 
         return this;
@@ -88,10 +88,6 @@ public class FlowSpecification {
 
     public void process(MessageWrapper message) {
         firstDeferred.accept(message);
-    }
-
-    private void connectExecutions(Stream<MessageWrapper> previousStream, final Deferred<MessageWrapper, Stream<MessageWrapper>> newDeferred) {
-        previousStream.consume(newDeferred);
     }
 
     private Deferred createNewDeferred(Dispatcher dispatcher) {

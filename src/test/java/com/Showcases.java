@@ -4,6 +4,7 @@ import com.configuration.FlowConfiguration;
 import com.configuration.SpringConfiguration;
 import com.jms.JMSMessageProducer;
 import com.redis.RedisDAO;
+import com.utils.Utils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -80,7 +81,7 @@ public class Showcases {
         // Send 10 messages
         for (int i = 0; i < 10; i++) {
             messageProducer.send(message);
-            pause(500);
+            Utils.pause(500);
         }
 
         // Wait for last record
@@ -131,7 +132,7 @@ public class Showcases {
 
     public void waitWhileDataWillSendToRedis(String dbKey) {
         do {
-            pause(500);
+            Utils.pause(500);
         } while (isDataStillSending(dbKey));
     }
 
@@ -139,10 +140,4 @@ public class Showcases {
         return redisDAO.retrieve(dbKey) == null;
     }
 
-    private void pause(long millis) {
-        try {
-            Thread.currentThread().sleep(millis);
-        } catch (InterruptedException e) {
-        }
-    }
 }

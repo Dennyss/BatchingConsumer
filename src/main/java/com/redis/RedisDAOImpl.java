@@ -7,8 +7,6 @@ import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import java.util.List;
-
 /**
  * Created by Denys Kovalenko on 9/23/2014.
  */

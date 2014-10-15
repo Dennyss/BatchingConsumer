@@ -1,6 +1,7 @@
 package com.tasks.farmwork;
 
 import com.core.MessageWrapper;
+import com.utils.Utils;
 import reactor.function.Function;
 
 /**
@@ -14,16 +15,10 @@ public class FeedChickens implements Function<MessageWrapper, MessageWrapper> {
 
         for(int i = 0; i < 5; i++){
             System.out.println("FeedChickens step executing ...");
-            pause(500);
+            Utils.pause(500);
         }
 
         return MessageWrapper.wrap(value + ":" + echoString);
     }
 
-    private void pause(long millis) {
-        try {
-            Thread.currentThread().sleep(millis);
-        } catch (InterruptedException e) {
-        }
-    }
 }
