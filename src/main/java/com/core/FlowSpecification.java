@@ -20,7 +20,9 @@ import java.util.List;
  */
 public class FlowSpecification {
     private static int MAX_PARALLEL_FLOWS = 16;
+    // Buffer related parameters (for batching processing)
     private static final int BUFFER_BACKLOG_SIZE = 10;
+    private static final int BUFFER_FLUSH_TIMEOUT = 2000;  // 2 sec
 
     private Environment environment;
     private Deferred<String, Stream<String>> firstDeferred;
@@ -41,7 +43,12 @@ public class FlowSpecification {
     }
 
     public FlowSpecification addBatchingStep(Function step) {
-        getLastStream().collect(BUFFER_BACKLOG_SIZE).map(step);
+        updateLastStream(getLastStream()
+                // Flush buffer by quantity of messages
+                .collect(BUFFER_BACKLOG_SIZE)
+                // Flush buffer by timeout
+                .timeout(BUFFER_FLUSH_TIMEOUT).flush()
+                .map(step));
         return this;
     }
 

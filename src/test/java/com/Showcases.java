@@ -12,6 +12,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Created by Denys Kovalenko on 10/9/2014.
@@ -56,7 +57,7 @@ public class Showcases {
     }
 
     @Test
-    public void batchingProcessingShowcase() {
+    public void bufferSizeDrivenBatchingProcessingShowcase() {
         String message = FlowConfiguration.BATCHING_SHOPPING_DESTINATION + "#" + "initiate";
         // Send 10 messages
         for (int i = 0; i < 10; i++) {
@@ -70,6 +71,31 @@ public class Showcases {
         for (int i = 0; i < 10; i++) {
             String result = redisDAO.retrieve(RedisDAO.RECORD_KEY + i);
             assertEquals(message + ":shopping:putToTheCart:shopping:checkout", result);
+        }
+    }
+
+    @Test
+    public void bufferTimeoutDrivenBatchingProcessingShowcase() {
+        String message = FlowConfiguration.BATCHING_SHOPPING_DESTINATION + "#" + "initiate";
+        // Send 10 messages
+        for (int i = 0; i < 10; i++) {
+            messageProducer.send(message);
+            pause(500);
+        }
+
+        // Wait for last record
+        waitWhileDataWillSendToRedis(RedisDAO.RECORD_KEY + 3);
+
+        // Check first 4 messages (should have value because buffer flush timeout is 2 seconds)
+        for (int i = 0; i < 4; i++) {
+            String result = redisDAO.retrieve(RedisDAO.RECORD_KEY + i);
+            assertEquals(message + ":shopping:putToTheCart:shopping:checkout", result);
+        }
+
+        // Check all other messages (should be null because buffer flush timeout is 2 seconds)
+        for (int i = 4; i < 10; i++) {
+            String result = redisDAO.retrieve(RedisDAO.RECORD_KEY + i);
+            assertNull(result);
         }
     }
 

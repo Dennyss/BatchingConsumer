@@ -1,6 +1,7 @@
 package com.configuration;
 
 import com.core.InputDispatcher;
+import com.core.LoggingDispatcher;
 import com.jms.JMSMessageConsumer;
 import com.jms.JMSMessageProducer;
 import com.redis.RedisDAOImpl;
@@ -88,6 +89,11 @@ public class SpringConfiguration {
     @Bean
     public InputDispatcher createInputDispatcher(){
         return new InputDispatcher();
+    }
+
+    @Bean
+    public LoggingDispatcher createLoggingDispatcher(){
+        return new LoggingDispatcher();
     }
 
     @Bean

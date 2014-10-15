@@ -1,6 +1,7 @@
 package com.jms;
 
 import com.core.InputDispatcher;
+import com.core.LoggingDispatcher;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -8,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.Reactor;
 import reactor.event.Event;
 import reactor.event.selector.Selectors;
-import reactor.function.Consumer;
 
 import javax.jms.*;
 
@@ -16,13 +16,12 @@ import javax.jms.*;
  * Created by Denys Kovalenko on 10/6/2014.
  */
 public class JMSMessageConsumer implements MessageListener, InitializingBean {
-    private Session session;
-
     @Autowired
     private Reactor reactor;
-
     @Autowired
     private InputDispatcher inputDispatcher;
+    @Autowired
+    private LoggingDispatcher loggingDispatcher;
 
     @Override
     public void afterPropertiesSet() {
@@ -30,7 +29,7 @@ public class JMSMessageConsumer implements MessageListener, InitializingBean {
         try {
             Connection connection = connectionFactory.createConnection();
             connection.start();
-            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             Destination queue = session.createQueue(JMSMessageProducer.QUEUE_NAME);
 
             MessageConsumer consumer = session.createConsumer(queue);
@@ -39,7 +38,8 @@ public class JMSMessageConsumer implements MessageListener, InitializingBean {
             e.printStackTrace();
         }
 
-        reactor.on(Selectors.$("hello"), inputDispatcher);
+        reactor.on(Selectors.$("messageProcessing"), inputDispatcher);
+        reactor.on(Selectors.$("logging"), loggingDispatcher);
     }
 
 
@@ -47,8 +47,8 @@ public class JMSMessageConsumer implements MessageListener, InitializingBean {
     public void onMessage(Message message) {
         TextMessage textMessage = (TextMessage) message;
         try {
-            reactor.notify("hello", Event.wrap(textMessage.getText()));
-            //System.out.println(textMessage.getText());
+            reactor.notify("messageProcessing", Event.wrap(textMessage.getText()));
+            reactor.notify("logging", Event.wrap(textMessage.getText()));
         } catch (JMSException e) {
             e.printStackTrace();
         }
